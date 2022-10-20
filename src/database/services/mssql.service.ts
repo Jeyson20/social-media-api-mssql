@@ -1,8 +1,7 @@
-import {
-    Injectable, Logger
-} from '@nestjs/common';
-import { ConfigService } from "@nestjs/config";
-import sql from 'mssql';
+/* eslint-disable prettier/prettier */
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { connect } from 'mssql';
 
 @Injectable()
 export class MssqlService {
@@ -21,33 +20,23 @@ export class MssqlService {
 
     async getConnection() {
         try {
-            const pool = await sql.connect({
+            const pool = await connect({
                 user: this.dbUser,
                 password: this.dbPassword,
                 database: this.dba,
                 server: this.dbServer,
                 options: {
                     encrypt: true, // for azure
-                    trustServerCertificate: true // change to true for local dev / self-signed certs
-                }
-            })
-            // const result = await pool.query("SELECT TOP (1000) [UserId],[FirstName],[LastName],[Email],[PhoneNumber],[IsActive]FROM [SocialMedia].[dbo].[Users]");
-            // console.log(result.recordset[0]);
-
+                    trustServerCertificate: true, // change to true for local dev / self-signed certs
+                },
+            });
             return pool;
         } catch (error) {
-            this.logger.log(error)
+            console.log(error);
         }
-    };
+    }
 
     // async close() {
     //     await (await this.getConnection()).close();
     // }
 }
-
-
-
-
-
-
-
