@@ -13,7 +13,13 @@ export class DatabaseModule implements OnModuleInit {
   constructor(private readonly oracleService: MssqlService) {}
 
   async onModuleInit() {
-    await this.oracleService.getConnection();
-    this.logger.log('MsSql connection established! :D');
+    const pool = await this.oracleService.getConnection();
+
+    if (pool.connected) {
+      this.logger.log('Mssql connection established! :D');
+    }
+
+    // const result = await pool.request().query('SELECT * FROM CATEGORIES');
+    // console.log(result.recordset);
   }
 }
