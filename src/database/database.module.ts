@@ -9,7 +9,6 @@ import { MssqlService } from './services';
 })
 export class DatabaseModule implements OnModuleInit {
   private readonly logger: Logger = new Logger(DatabaseModule.name);
-
   constructor(private readonly oracleService: MssqlService) {}
 
   async onModuleInit() {
@@ -19,7 +18,7 @@ export class DatabaseModule implements OnModuleInit {
       this.logger.log('Mssql connection established! :D');
     }
 
-    // const result = await pool.request().query('SELECT * FROM CATEGORIES');
+    // const result = await pool.request().query('SELECT * FROM Users');
     // console.log(result.recordset);
   }
 }
