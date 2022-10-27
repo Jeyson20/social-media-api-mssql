@@ -1,24 +1,22 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {IsNotEmpty, IsOptional } from 'class-validator';
 
 export class BodySignupUserDto {
 
-    @IsString()
+    @IsNotEmpty()
     readonly firstName: string;
 
-    @IsString()
+    @IsNotEmpty()
     readonly lastName: string;
 
-    @IsString()
+    @IsNotEmpty()
     readonly email: string;
 
-    @IsString()
+    @IsNotEmpty()
     readonly password: string;
 
-    @IsString()
     @IsOptional()
     readonly phoneNumber: string;
 
-    @IsBoolean()
     @IsOptional()
     readonly isActive: boolean;
 }

@@ -14,7 +14,7 @@ export class UsersService {
 
             const data = {
                 response: result[1][0],
-                data: result[0],
+                users: result[0],
             }
 
             return data;

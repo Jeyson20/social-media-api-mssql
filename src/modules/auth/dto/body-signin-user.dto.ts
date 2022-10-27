@@ -1,10 +1,10 @@
-import { IsString } from "class-validator";
+import { IsNotEmpty } from "class-validator";
 
 export class BodySigninUserDto {
 
-    @IsString()
+    @IsNotEmpty()
     readonly email: string;
 
-    @IsString()
+    @IsNotEmpty()
     readonly password: string;
 }

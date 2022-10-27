@@ -6,7 +6,7 @@ export class PostsController {
     constructor(private readonly postService: PostsService) { }
 
     @Get()
-    getUsers() {
+    getPosts() {
         return this.postService.getPosts();
     }
 }
