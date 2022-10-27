@@ -3,12 +3,14 @@ import { MssqlService } from 'src/database/services';
 import { BodySigninUserDto, BodySignupUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
     constructor(
         readonly mssqlService: MssqlService,
-        readonly usersService: UsersService
+        readonly usersService: UsersService,
+        readonly jwtService: JwtService
     ) { }
 
     async signin(params: BodySigninUserDto) {
@@ -19,17 +21,14 @@ export class AuthService {
         const pass = await bcrypt.compare(params.password, user.Password)
         if (!pass) throw new BadRequestException('Incorrect user or password');
 
+        const payload = { id: user.Id, fullName: `${user.FirstName} ${user.LastName}`, email: user.Email };
+        const token = this.jwtService.sign(payload);
+
         const data = {
-            response: {
-                code: 200,
-                description: "OK"
-            },
-            userData: {
-                firstName: user.FirstName,
-                lastName: user.LastName,
-                email: user.Email,
-            }
+            user,
+            token
         }
+
         return data
     }
 
@@ -55,23 +54,11 @@ export class AuthService {
 
     }
 
-
     async encriptPassword(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
         return await bcrypt.hash(password, salt);
     }
 
-
-
-    // async validatePassword(email: string, pass: ): Promise<string> {
-
-    //     const user = await this.usersService.getUserByEmail(email);
-    //     if (user && user.password === pass) {
-    //         const { password, ...result } = user;
-    //         return result;
-    //     }
-    //     return null;
-    // }
 
     async validateUser(email: string): Promise<any> {
 
