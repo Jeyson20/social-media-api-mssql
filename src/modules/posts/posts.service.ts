@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MssqlService } from 'src/database/services';
 import { BodyCreatePostDto } from './dto';
+import { BodyUpdatePostDto } from './dto/body-update-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -56,5 +57,37 @@ export class PostsService {
         }
     }
 
+
+    async updatePost(id: number, params: BodyUpdatePostDto) {
+        try {
+            const pool = await this.mssqlService.getConnection();
+            const result = (await pool.request()
+                .input('id', id)
+                .input('description', params.description)
+                .input('image', params.image)
+                .execute('SP_UPDATE_POST'))
+                .recordset[0];
+
+            return result;
+
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
+
+    async deletePost(id: number) {
+        try {
+            const pool = await this.mssqlService.getConnection();
+            const result = (await pool.request()
+                .input('id', id)
+                .execute('SP_DELETE_POST'))
+                .recordset[0];
+
+            return result;
+
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
 
 }
