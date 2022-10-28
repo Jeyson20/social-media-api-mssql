@@ -1,0 +1,1 @@
+export {BodyCreatePostDto} from './body-create-post.dto';
