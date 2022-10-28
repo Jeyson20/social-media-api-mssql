@@ -3,23 +3,34 @@ import { MssqlService } from 'src/database/services';
 
 @Injectable()
 export class PostsService {
-        constructor(private readonly mssqlService: MssqlService) { }
+    constructor(private readonly mssqlService: MssqlService) { }
 
     async getPosts() {
-
-        const pool = await this.mssqlService.getConnection();
-
         try {
-            const result = (await pool.query('SELECT * FROM POSTS')).recordset;
+            const pool = await this.mssqlService.getConnection();
+            const result = (await pool.query('SP_GET_POSTS')).recordsets;
 
-            // const response = {
-            //   statusCode: 200,
-            //   message: 
-            // }
             return {
-                code: 200,
-                message: 'OK',
-                data: result
+                response: result[1][0],
+                data: result[0],
+            }
+
+        } catch (error) {
+            throw new BadRequestException(error.message);
+        }
+    }
+
+    async getPostsByUser(email: string) {
+        try {
+            const pool = await this.mssqlService.getConnection();
+            const result = (await pool.request()
+                .input('email', email)
+                .execute('SP_GET_POSTS_BY_USER'))
+                .recordsets;
+
+            return {
+                response: result[1][0],
+                data: result[0],
             }
 
         } catch (error) {
