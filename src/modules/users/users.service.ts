@@ -12,12 +12,10 @@ export class UsersService {
             const conn = await this.mssqlService.getConnection();
             const result = (await conn.request().execute('SP_GET_USERS')).recordsets;
 
-            const data = {
+            return {
                 response: result[1][0],
-                users: result[0],
+                data: result[0],
             }
-
-            return data;
 
         } catch (ex) {
             throw new BadRequestException(ex.message)
@@ -33,12 +31,10 @@ export class UsersService {
                 .input('UserId', id)
                 .execute('SP_GET_USER')).recordsets;
 
-            const data = {
+            return {
                 response: result[1][0],
                 data: result[0],
             }
-
-            return data;
 
         } catch (ex) {
             throw new BadRequestException(ex.message)
@@ -48,21 +44,32 @@ export class UsersService {
     async getUserByEmail(email: string): Promise<any> {
 
         try {
-
             const conn = await this.mssqlService.getConnection();
             const result = (await conn.request()
                 .input('email', email)
                 .execute('SP_GET_USER_BY_EMAIL')).recordsets;
-                
-            const data = {
+
+            return {
                 response: result[1][0],
                 data: result[0],
             }
 
-            return data;
-
         } catch (ex) {
             throw new BadRequestException(ex.message)
         }
+    }
+
+    async validateUser(email: string): Promise<any> {
+
+        try {
+            const conn = await this.mssqlService.getConnection();
+            const user = (await conn.request()
+                .input('email', email)
+                .execute('SP_GET_VALIDATE_USER')).recordset[0];
+            return user;
+        } catch (ex) {
+            throw new BadRequestException(ex.message)
+        }
+
     }
 }
