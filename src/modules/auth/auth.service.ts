@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
 import { MssqlService } from 'src/database/services';
 import { BodySigninUserDto, BodySignupUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
@@ -15,7 +15,7 @@ export class AuthService {
 
     async signin(params: BodySigninUserDto) {
 
-        const user = await this.validateUser(params.email);
+        const user = await this.usersService.validateUser(params.email);
         if (!user) throw new BadRequestException('Incorrect user or password');
 
         const pass = await bcrypt.compare(params.password, user.Password)
@@ -24,15 +24,16 @@ export class AuthService {
         const payload = { id: user.Id, fullName: `${user.FirstName} ${user.LastName}`, email: user.Email };
         const token = this.jwtService.sign(payload);
 
-        const data = {
+        return {
             user,
             token
         }
-
-        return data
     }
 
     async signup(params: BodySignupUserDto) {
+
+        const user = await this.usersService.validateUser(params.email);
+        if (user) throw new ConflictException('This user already exists')
 
         const pass = await this.encriptPassword(params.password);
         try {
@@ -44,7 +45,7 @@ export class AuthService {
                 .input('password', pass)
                 .input('phoneNumber', params.phoneNumber)
                 .input('isActive', params.isActive)
-                .execute('SP_POST_USER')).recordset;
+                .execute('SP_POST_USER')).recordset[0];
 
             return result;
 
@@ -57,16 +58,6 @@ export class AuthService {
     async encriptPassword(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
         return await bcrypt.hash(password, salt);
-    }
-
-
-    async validateUser(email: string): Promise<any> {
-
-        const conn = await this.mssqlService.getConnection();
-        const user = (await conn.request()
-            .input('email', email)
-            .execute('SP_GET_VALIDATE_USER')).recordset[0];
-        return user;
     }
 
 }
