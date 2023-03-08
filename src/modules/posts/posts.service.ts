@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { renameObjectKeys, Response } from 'src/common/utils';
 import { MssqlService } from 'src/database/services';
 import { BodyCreatePostDto } from './dto';
 import { BodyUpdatePostDto } from './dto/body-update-post.dto';
@@ -7,33 +8,27 @@ import { BodyUpdatePostDto } from './dto/body-update-post.dto';
 export class PostsService {
     constructor(private readonly mssqlService: MssqlService) { }
 
-    async getPosts() {
+    async getPosts(): Promise<any> {
         try {
             const pool = await this.mssqlService.getConnection();
-            const result = (await pool.query('SP_GET_POSTS')).recordsets;
+            const result = (await pool.query('SP_GET_POSTS')).recordsets[0];
 
-            return {
-                response: result[1][0],
-                data: result[0],
-            }
+            return new Response<[]>(true, null, renameObjectKeys(result));
 
         } catch (error) {
             throw new BadRequestException(error.message);
         }
     }
 
-    async getPostsByUser(email: string) {
+    async getPostsByUser(email: string) : Promise<any> {
         try {
             const pool = await this.mssqlService.getConnection();
             const result = (await pool.request()
                 .input('email', email)
                 .execute('SP_GET_POSTS_BY_USER'))
-                .recordsets;
+                .recordsets[0];
 
-            return {
-                response: result[1][0],
-                data: result[0],
-            }
+                return new Response<[]>(true, null, renameObjectKeys(result));
 
         } catch (error) {
             throw new BadRequestException(error.message);

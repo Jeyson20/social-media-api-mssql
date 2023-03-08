@@ -4,6 +4,7 @@ import { BodySigninUserDto, BodySignupUserDto } from './dto';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { renameObjectKeys, Response } from 'src/common/utils';
 
 @Injectable()
 export class AuthService {
@@ -15,13 +16,15 @@ export class AuthService {
 
     async signin(params: BodySigninUserDto) {
 
-        const user = await this.usersService.validateUser(params.email);
-        if (!user) throw new BadRequestException('Incorrect user or password');
+        const validateUser = await this.usersService.validateUser(params.email);
+        if (!validateUser) throw new BadRequestException('Incorrect user or password');
 
-        const pass = await bcrypt.compare(params.password, user.Password)
+        var user = renameObjectKeys(validateUser);
+
+        const pass = await bcrypt.compare(params.password, user.password)
         if (!pass) throw new BadRequestException('Incorrect user or password');
 
-        const payload = { id: user.Id, fullName: `${user.FirstName} ${user.LastName}`, email: user.Email };
+        const payload = { id: user.id, fullName: `${user.firstName} ${user.lastName}`, email: user.email };
         const token = this.jwtService.sign(payload);
 
         return {
@@ -47,7 +50,7 @@ export class AuthService {
                 .input('isActive', params.isActive)
                 .execute('SP_POST_USER')).recordset[0];
 
-            return result;
+            return new Response<number>(true, null, result.data)
 
         } catch (ex) {
             throw new BadRequestException(ex.message);
@@ -55,9 +58,10 @@ export class AuthService {
 
     }
 
-    async encriptPassword(password: string): Promise<string> {
+    private async encriptPassword(password: string): Promise<string> {
         const salt = await bcrypt.genSalt(10);
         return await bcrypt.hash(password, salt);
     }
 
 }
+

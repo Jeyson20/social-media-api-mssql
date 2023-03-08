@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { MssqlService } from 'src/database/services';
+import { renameObjectKeys, Response } from 'src/common/utils';
 
 @Injectable()
 export class UsersService {
@@ -12,10 +13,7 @@ export class UsersService {
             const conn = await this.mssqlService.getConnection();
             const result = (await conn.request().execute('SP_GET_USERS')).recordsets;
 
-            return {
-                response: result[1][0],
-                data: result[0],
-            }
+            return new Response<[]>(true, null, renameObjectKeys(result[0]));
 
         } catch (ex) {
             throw new BadRequestException(ex.message)
@@ -31,10 +29,7 @@ export class UsersService {
                 .input('UserId', id)
                 .execute('SP_GET_USER')).recordsets;
 
-            return {
-                response: result[1][0],
-                data: result[0],
-            }
+            return new Response<{}>(true, null, renameObjectKeys(result[0][0]));
 
         } catch (ex) {
             throw new BadRequestException(ex.message)
@@ -49,10 +44,7 @@ export class UsersService {
                 .input('email', email)
                 .execute('SP_GET_USER_BY_EMAIL')).recordsets;
 
-            return {
-                response: result[1][0],
-                data: result[0],
-            }
+            return new Response<{}>(true, null, renameObjectKeys(result[0][0]));
 
         } catch (ex) {
             throw new BadRequestException(ex.message)
