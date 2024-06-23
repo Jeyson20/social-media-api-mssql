@@ -1,7 +1,7 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty } from "class-validator";
 
-export class BodySigninUserDto {
+export class BodyLoginUserDto {
 
     @ApiProperty()
     @IsNotEmpty()
@@ -11,3 +11,7 @@ export class BodySigninUserDto {
     @IsNotEmpty()
     readonly password: string;
 }
+export class AuthTokenDto {
+    accessToken: string;
+    refreshToken: string;
+  }

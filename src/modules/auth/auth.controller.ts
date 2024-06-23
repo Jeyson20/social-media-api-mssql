@@ -1,7 +1,8 @@
 import { Body, Controller, HttpCode, Post, Request, UsePipes, ValidationPipe, HttpStatus } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import {ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { BodySigninUserDto, BodySignupUserDto } from './dto';
+import { BodyLoginUserDto, BodyRegisterUserDto } from './dto';
+import { BodyRefreshTokenDto } from './dto/body-refresh-token.dto';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -11,16 +12,21 @@ import { BodySigninUserDto, BodySignupUserDto } from './dto';
 export class AuthController {
     constructor(readonly authService: AuthService) { }
 
-    @Post('/signup')
+    @Post('/register')
     @HttpCode(HttpStatus.CREATED)
-    async signup(@Body() params: BodySignupUserDto) {
-        return await this.authService.signup(params);
+    async signup(@Body() params: BodyRegisterUserDto) {
+        return await this.authService.register(params);
     }
 
-    @Post('/signin')
+    @Post('/login')
     @HttpCode(HttpStatus.OK)
-    async signin(@Body() params: BodySigninUserDto) {
-        return await this.authService.signin(params);
+    async signin(@Body() params: BodyLoginUserDto) {
+        return await this.authService.login(params);
     }
-
+    
+    @Post('/refresh-token')
+    @HttpCode(HttpStatus.OK)
+    async refreshToken(@Body() params: BodyRefreshTokenDto): Promise<object> {
+        return await this.authService.refreshToken(params);
+    }
 }
